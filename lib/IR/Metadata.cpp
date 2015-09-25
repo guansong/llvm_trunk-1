@@ -29,6 +29,28 @@
 
 using namespace llvm;
 
+static int counter = 0;
+static int CountMeta = (getenv("COUNTMETA") ? atoi(getenv("COUNTMETA")) : -1);
+
+static void displayMetaDataGenerated(MDNode * M)
+{
+  char buffer[10];
+
+  llvm::dbgs() << "; MetaData ";
+
+  //none of these are defined
+  //llvm::dbgs() << std::setw(5); //what is the return type of setw?
+  //llvm::dbgs().width(5);
+
+  sprintf(buffer, "%03d", counter);
+  llvm::dbgs() << buffer;
+
+  llvm::dbgs() << " generated: "; 
+
+
+  llvm::dbgs() << "\n";
+}
+
 MetadataAsValue::MetadataAsValue(Type *Ty, Metadata *MD)
     : Value(Ty, MetadataAsValueVal), MD(MD) {
   track();
@@ -415,12 +437,20 @@ void MDNode::operator delete(void *Mem) {
 MDNode::MDNode(LLVMContext &Context, unsigned ID, StorageType Storage,
                ArrayRef<Metadata *> Ops1, ArrayRef<Metadata *> Ops2)
     : Metadata(ID, Storage), NumOperands(Ops1.size() + Ops2.size()),
-      NumUnresolved(0), Context(Context) {
+      NumUnresolved(0), Context(Context), id(0) {
   unsigned Op = 0;
   for (Metadata *MD : Ops1)
     setOperand(Op++, MD);
   for (Metadata *MD : Ops2)
     setOperand(Op++, MD);
+
+  if (CountMeta >= 0) {
+    this->id = ++ counter;
+    if (counter == CountMeta) {
+      displayMetaDataGenerated(this);
+
+    }
+  }
 
   if (isDistinct())
     return;

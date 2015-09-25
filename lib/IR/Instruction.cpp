@@ -18,11 +18,47 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Operator.h"
 #include "llvm/IR/Type.h"
+
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
+
+#include <iostream>
+#include <iomanip>
+
 using namespace llvm;
+
+static int counter = 0;
+static int CountInst = (getenv("COUNTINST") ? atoi(getenv("COUNTINST")) : -1);
+
+static void displayInstructionGenerated(Instruction * I)
+{
+  char buffer[10];
+
+  llvm::dbgs() << "; Instruction ";
+
+  //none of these are defined
+  //llvm::dbgs() << std::setw(5); //what is the return type of setw?
+  //llvm::dbgs().width(5);
+
+  sprintf(buffer, "%04d", counter);
+  llvm::dbgs() << buffer;
+
+  llvm::dbgs() << " generated:"; 
+
+  // Instruction may not be able to be dumped here!
+  //llvm::dbgs() << "\t";
+  //this->dump();
+  llvm::dbgs() << "\t";
+  llvm::dbgs() << I->getOpcodeName(I->getOpcode());
+
+  for (int i=0, e=I->getNumOperands(); i != e; i++)
+    llvm::dbgs() << " < >";
+  llvm::dbgs() << "\n";
+}
 
 Instruction::Instruction(Type *ty, unsigned it, Use *Ops, unsigned NumOps,
                          Instruction *InsertBefore)
-  : User(ty, Value::InstructionVal + it, Ops, NumOps), Parent(nullptr) {
+  : User(ty, Value::InstructionVal + it, Ops, NumOps), Parent(nullptr), id(0) {
 
   // If requested, insert this instruction into a basic block...
   if (InsertBefore) {
@@ -30,15 +66,29 @@ Instruction::Instruction(Type *ty, unsigned it, Use *Ops, unsigned NumOps,
     assert(BB && "Instruction to insert before is not in a basic block!");
     BB->getInstList().insert(InsertBefore, this);
   }
+  
+  if (CountInst >= 0) {
+    this->id = ++ counter;
+    if (counter == CountInst) {
+      displayInstructionGenerated(this);
+    }
+  }
 }
 
 Instruction::Instruction(Type *ty, unsigned it, Use *Ops, unsigned NumOps,
                          BasicBlock *InsertAtEnd)
-  : User(ty, Value::InstructionVal + it, Ops, NumOps), Parent(nullptr) {
+  : User(ty, Value::InstructionVal + it, Ops, NumOps), Parent(nullptr), id(0) {
 
   // append this instruction into the basic block
   assert(InsertAtEnd && "Basic block to append to may not be NULL!");
   InsertAtEnd->getInstList().push_back(this);
+
+  if (CountInst >= 0) {
+    this->id = ++ counter;
+    if (counter == CountInst) {
+      displayInstructionGenerated(this);
+    }
+  }
 }
 
 

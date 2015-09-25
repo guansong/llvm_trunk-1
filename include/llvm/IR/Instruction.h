@@ -61,6 +61,9 @@ class Instruction : public User, public ilist_node<Instruction> {
     HasMetadataBit = 1 << 15
   };
 public:
+  friend class AssemblyWriter;
+  int id;
+
   // Out of line virtual method, so the vtable, etc has a home.
   ~Instruction() override;
 
