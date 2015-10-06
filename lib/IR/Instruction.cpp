@@ -29,6 +29,7 @@ using namespace llvm;
 
 static int counter = 0;
 static int CountInst = (getenv("COUNTINST") ? atoi(getenv("COUNTINST")) : -1);
+static int ShowInst = (getenv("SHOWINST") ? atoi(getenv("SHOWINST")) : -1);
 
 static void displayInstructionGenerated(Instruction * I)
 {
@@ -67,9 +68,9 @@ Instruction::Instruction(Type *ty, unsigned it, Use *Ops, unsigned NumOps,
     BB->getInstList().insert(InsertBefore, this);
   }
   
-  if (CountInst >= 0) {
+  if (CountInst >= 0 || ShowInst >= 0 ) {
     this->id = ++ counter;
-    if (counter == CountInst) {
+    if (counter == CountInst || ShowInst >= 0 ) {
       displayInstructionGenerated(this);
     }
   }
@@ -83,9 +84,9 @@ Instruction::Instruction(Type *ty, unsigned it, Use *Ops, unsigned NumOps,
   assert(InsertAtEnd && "Basic block to append to may not be NULL!");
   InsertAtEnd->getInstList().push_back(this);
 
-  if (CountInst >= 0) {
+  if (CountInst >= 0 || ShowInst >= 0 ) {
     this->id = ++ counter;
-    if (counter == CountInst) {
+    if (counter == CountInst || ShowInst >= 0) {
       displayInstructionGenerated(this);
     }
   }
