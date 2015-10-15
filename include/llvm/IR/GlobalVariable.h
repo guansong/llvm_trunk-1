@@ -46,6 +46,8 @@ class GlobalVariable : public GlobalObject, public ilist_node<GlobalVariable> {
                                                // value before global
                                                // initializers are run?
 public:
+  int id;
+
   // allocate space for exactly one operand
   void *operator new(size_t s) {
     return User::operator new(s, 1);

@@ -2355,8 +2355,15 @@ static void maybePrintComdat(formatted_raw_ostream &Out,
 }
 
 void AssemblyWriter::printGlobal(const GlobalVariable *GV) {
+  char buffer[10];
+
   if (GV->isMaterializable())
     Out << "; Materializable\n";
+
+  if (GV->id) {
+    sprintf(buffer, "%03d", GV->id);
+    Out << buffer << "\t";
+  }
 
   WriteAsOperandInternal(Out, GV, &TypePrinter, &Machine, GV->getParent());
   Out << " = ";

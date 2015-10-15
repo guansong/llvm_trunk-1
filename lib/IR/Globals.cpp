@@ -21,8 +21,33 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Operator.h"
 #include "llvm/Support/ErrorHandling.h"
+
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
+
 using namespace llvm;
 
+static int counter = 0;
+static int CountGlobal = (getenv("COUNTGLOBAL") ? atoi(getenv("COUNTGLOBAL")) : -1);
+
+static void displayGlobalGenerated(GlobalVariable * GV)
+{
+  char buffer[10];
+
+  llvm::dbgs() << "; Global ";
+
+  //none of these are defined
+  //llvm::dbgs() << std::setw(5); //what is the return type of setw?
+  //llvm::dbgs().width(5);
+
+  sprintf(buffer, "%03d", counter);
+  llvm::dbgs() << buffer;
+
+  llvm::dbgs() << " generated: "; 
+
+  llvm::dbgs() << "\n";
+}
+ 
 //===----------------------------------------------------------------------===//
 //                            GlobalValue Class
 //===----------------------------------------------------------------------===//
@@ -151,13 +176,22 @@ GlobalVariable::GlobalVariable(Type *Ty, bool constant, LinkageTypes Link,
                    OperandTraits<GlobalVariable>::op_begin(this),
                    InitVal != nullptr, Link, Name, AddressSpace),
       isConstantGlobal(constant),
-      isExternallyInitializedConstant(isExternallyInitialized) {
+      isExternallyInitializedConstant(isExternallyInitialized), id(0) {
   setThreadLocalMode(TLMode);
   if (InitVal) {
     assert(InitVal->getType() == Ty &&
            "Initializer should be the same type as the GlobalVariable!");
     Op<0>() = InitVal;
   }
+
+  if (CountGlobal >= 0) {
+    this->id = ++ counter;
+
+    if (counter == CountGlobal){
+      displayGlobalGenerated(this);
+    }
+  }
+
 }
 
 GlobalVariable::GlobalVariable(Module &M, Type *Ty, bool constant,
@@ -169,7 +203,7 @@ GlobalVariable::GlobalVariable(Module &M, Type *Ty, bool constant,
                    OperandTraits<GlobalVariable>::op_begin(this),
                    InitVal != nullptr, Link, Name, AddressSpace),
       isConstantGlobal(constant),
-      isExternallyInitializedConstant(isExternallyInitialized) {
+      isExternallyInitializedConstant(isExternallyInitialized), id(0) {
   setThreadLocalMode(TLMode);
   if (InitVal) {
     assert(InitVal->getType() == Ty &&
@@ -181,6 +215,15 @@ GlobalVariable::GlobalVariable(Module &M, Type *Ty, bool constant,
     Before->getParent()->getGlobalList().insert(Before, this);
   else
     M.getGlobalList().push_back(this);
+
+  if (CountGlobal >= 0) {
+    this->id = ++ counter;
+
+    if (counter == CountGlobal){
+      displayGlobalGenerated(this);
+    }
+  }
+
 }
 
 void GlobalVariable::setParent(Module *parent) {
