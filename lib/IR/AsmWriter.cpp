@@ -56,6 +56,9 @@ AssemblyAnnotationWriter::~AssemblyAnnotationWriter() {}
 // Helper Functions
 //===----------------------------------------------------------------------===//
 
+//global hsa flag
+bool isHSATriple = false;
+
 namespace {
 struct OrderMap {
   DenseMap<const Value *, std::pair<unsigned, bool>> IDs;
@@ -2717,6 +2720,7 @@ void AssemblyWriter::printInfoComment(const Value &V) {
     AnnotationWriter->printInfoComment(V, Out);
 }
 
+
 // This member is called for each Instruction in a function..
 void AssemblyWriter::printInstruction(const Instruction &I) {
   if (I.id) {
@@ -2752,6 +2756,18 @@ void AssemblyWriter::printInstruction(const Instruction &I) {
 
   // Print out the opcode...
   Out << I.getOpcodeName();
+
+  // FIXME: consider this as HSAIL backend bug for now
+  if (const CallInst *CI = dyn_cast<CallInst>(&I)) {
+    if (CI->isMustTailCall()) {
+    }
+    else if (CI->isTailCall()) {
+    }
+
+    if (isHSATriple) {
+      Out << " spir_func";
+    }
+  }
 
   // If this is an atomic load or store, print out the atomic marker.
   if ((isa<LoadInst>(I)  && cast<LoadInst>(I).isAtomic()) ||
