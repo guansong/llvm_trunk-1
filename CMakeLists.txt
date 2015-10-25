@@ -700,3 +700,26 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
                               -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
   endif()
 endif()
+
+# ...but only make it a dependency of the project if the ctags program
+# is available, else it will fail to build on Windows.
+find_program(CTAGS_PATH ctags)
+if(CTAGS_PATH)
+  message(STATUS "Found ctags: ${CTAGS_PATH}")
+
+  # Add a top-level "tag" target which includes all files in both
+  # the build and source versions of src/*.
+  set_source_files_properties(tag PROPERTIES GENERATED true)
+  add_custom_target(tag
+    COMMAND ${LLVM_MAIN_SRC_DIR}/createtag.sh ${LLVM_MAIN_SRC_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+  # Add a top-level "cleantag" target which includes all files in both
+  # the build and source versions of src/*.
+  set_source_files_properties(cleantag PROPERTIES GENERATED true)
+  add_custom_target(cleantag
+    COMMAND ${LLVM_MAIN_SRC_DIR}/createtag.sh -r ${LLVM_MAIN_SRC_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+  #add_dependencies(LLVM tag)
+endif(CTAGS_PATH)
