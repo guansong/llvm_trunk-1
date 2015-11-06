@@ -34,6 +34,7 @@ using namespace llvm;
 
 static int counter = 0;
 static int CountLabel = (getenv("COUNTLABEL") ? atoi(getenv("COUNTLABEL")) : -1);
+static int Continue = (getenv("BREAK") ? 1:0);
 
 static void displayLabelGenerated(BasicBlock * B)
 {
@@ -48,13 +49,16 @@ static void displayLabelGenerated(BasicBlock * B)
   sprintf(buffer, "%03d", counter);
   llvm::dbgs() << buffer;
 
-  llvm::dbgs() << " generated: "; 
+  llvm::dbgs() << " generated: ";
 
   llvm::dbgs() << B->getName();
 
   llvm::dbgs() << "\n";
+
+  if (Continue)
+    assert(!Continue && "Break");
 }
- 
+
 ValueSymbolTable *BasicBlock::getValueSymbolTable() {
   if (Function *F = getParent())
     return &F->getValueSymbolTable();

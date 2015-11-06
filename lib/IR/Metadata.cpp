@@ -31,6 +31,7 @@ using namespace llvm;
 
 static int counter = 0;
 static int CountMeta = (getenv("COUNTMETA") ? atoi(getenv("COUNTMETA")) : -1);
+static int Continue = (getenv("BREAK") ? 1:0);
 
 static void displayMetaDataGenerated(MDNode * M)
 {
@@ -49,6 +50,9 @@ static void displayMetaDataGenerated(MDNode * M)
 
 
   llvm::dbgs() << "\n";
+
+  if (Continue)
+    assert(!Continue && "Break");
 }
 
 MetadataAsValue::MetadataAsValue(Type *Ty, Metadata *MD)

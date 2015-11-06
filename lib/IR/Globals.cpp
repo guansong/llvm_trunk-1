@@ -29,6 +29,7 @@ using namespace llvm;
 
 static int counter = 0;
 static int CountGlobal = (getenv("COUNTGLOBAL") ? atoi(getenv("COUNTGLOBAL")) : -1);
+static int Continue = (getenv("BREAK") ? 1:0);
 
 static void displayGlobalGenerated(GlobalVariable * GV)
 {
@@ -46,6 +47,9 @@ static void displayGlobalGenerated(GlobalVariable * GV)
   llvm::dbgs() << " generated: "; 
 
   llvm::dbgs() << "\n";
+
+  if (Continue)
+    assert(!Continue && "Break");
 }
  
 //===----------------------------------------------------------------------===//

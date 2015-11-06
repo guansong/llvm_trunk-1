@@ -30,6 +30,7 @@ using namespace llvm;
 static int counter = 0;
 static int CountInst = (getenv("COUNTINST") ? atoi(getenv("COUNTINST")) : -1);
 static int ShowInst = (getenv("SHOWINST") ? atoi(getenv("SHOWINST")) : -1);
+static int Continue = (getenv("BREAK") ? 1:0);
 
 static void displayInstructionGenerated(Instruction * I)
 {
@@ -44,7 +45,7 @@ static void displayInstructionGenerated(Instruction * I)
   sprintf(buffer, "%04d", counter);
   llvm::dbgs() << buffer;
 
-  llvm::dbgs() << " generated:"; 
+  llvm::dbgs() << " generated:";
 
   // Instruction may not be able to be dumped here!
   //llvm::dbgs() << "\t";
@@ -55,6 +56,9 @@ static void displayInstructionGenerated(Instruction * I)
   for (int i=0, e=I->getNumOperands(); i != e; i++)
     llvm::dbgs() << " < >";
   llvm::dbgs() << "\n";
+
+  if (Continue)
+    assert(!Continue && "Break");
 }
 
 Instruction::Instruction(Type *ty, unsigned it, Use *Ops, unsigned NumOps,
