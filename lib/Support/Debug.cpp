@@ -101,6 +101,30 @@ struct DebugOnlyOpt {
 
 }
 
+namespace llvm {
+  delimiter::delimiter(char const * msg, int enabled) {
+    fEnabled = enabled;
+
+    llvm::dbgs() << msg;
+
+    if (enabled) {
+      llvm::dbgs() << "{";
+      llvm::dbgs() << "\n";
+    }
+  }
+
+  delimiter::~delimiter() {
+
+    if (fEnabled) {
+      llvm::dbgs() <<  "}";
+      llvm::dbgs() << "\n";
+    }
+  }
+
+
+}
+
+
 static DebugOnlyOpt DebugOnlyOptLoc;
 
 static cl::opt<DebugOnlyOpt, true, cl::parser<std::string> >
@@ -139,6 +163,8 @@ raw_ostream &llvm::dbgs() {
 
   return thestrm.strm;
 }
+
+
 
 #else
 // Avoid "has no symbols" warning.
