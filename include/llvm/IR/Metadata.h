@@ -779,6 +779,9 @@ protected:
   }
 
 public:
+  friend class AssemblyWriter;
+  int id;
+
   static inline MDTuple *get(LLVMContext &Context, ArrayRef<Metadata *> MDs);
   static inline MDTuple *getIfExists(LLVMContext &Context,
                                      ArrayRef<Metadata *> MDs);

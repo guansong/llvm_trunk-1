@@ -66,6 +66,9 @@ class BasicBlock : public Value, // Basic blocks are data objects also
                    public ilist_node<BasicBlock> {
   friend class BlockAddress;
 public:
+  friend class AssemblyWriter;
+  int id;
+
   typedef iplist<Instruction> InstListType;
 private:
   InstListType InstList;

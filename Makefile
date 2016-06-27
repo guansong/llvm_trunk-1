@@ -281,6 +281,13 @@ update:
 
 happiness: update all check-all
 
+tag:
+	find $(LLVM_SRC_ROOT) -type d -a ! \( -type d -empty \) -a ! \( -name \.git -prune \) -exec sh -c "cd \"{}\"; if test ! -f .keep; then ctags --extra=+q --fields=+ani --C++-kinds=+p *; fi" \;
+	(cd $(LLVM_SRC_ROOT); ctags --file-scope=no -R)
+
+cleantag:
+	find $(LLVM_SRC_ROOT) -type d -a ! \( -name \.git -prune \) -exec sh -c "cd \"{}\"; rm -f tags" \;
+
 .PHONY: srpm rpm update happiness
 
 # declare all targets at this level to be serial:

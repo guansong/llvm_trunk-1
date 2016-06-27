@@ -44,6 +44,9 @@
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 #include <cctype>
+#include <iostream>
+#include <iomanip>
+
 using namespace llvm;
 
 // Make virtual table appear in this compilation unit.
@@ -52,6 +55,9 @@ AssemblyAnnotationWriter::~AssemblyAnnotationWriter() {}
 //===----------------------------------------------------------------------===//
 // Helper Functions
 //===----------------------------------------------------------------------===//
+
+//global hsa flag
+bool isHSATriple = false;
 
 namespace {
 struct OrderMap {
@@ -2352,8 +2358,15 @@ static void maybePrintComdat(formatted_raw_ostream &Out,
 }
 
 void AssemblyWriter::printGlobal(const GlobalVariable *GV) {
+  char buffer[10];
+
   if (GV->isMaterializable())
     Out << "; Materializable\n";
+
+  if (GV->id) {
+    sprintf(buffer, "%03d", GV->id);
+    Out << buffer << "\t";
+  }
 
   WriteAsOperandInternal(Out, GV, &TypePrinter, &Machine, GV->getParent());
   Out << " = ";
@@ -2620,12 +2633,23 @@ void AssemblyWriter::printArgument(const Argument *Arg,
 /// printBasicBlock - This member is called for each basic block in a method.
 ///
 void AssemblyWriter::printBasicBlock(const BasicBlock *BB) {
+  char buffer[10];
+
   if (BB->hasName()) {              // Print out the label if it exists...
     Out << "\n";
+    if (BB->id) {
+      sprintf(buffer, "%03d", BB->id);
+      Out << buffer << "\t";
+    }
     PrintLLVMName(Out, BB->getName(), LabelPrefix);
     Out << ':';
   } else if (!BB->use_empty()) {      // Don't print block # of no uses...
-    Out << "\n; <label>:";
+    Out << "\n";
+    if (BB->id) {
+      sprintf(buffer, "%03d", BB->id);
+      Out << buffer << "\t";
+    }
+    Out << "; <label>:";
     int Slot = Machine.getLocalSlot(BB);
     if (Slot != -1)
       Out << Slot;
@@ -2696,8 +2720,15 @@ void AssemblyWriter::printInfoComment(const Value &V) {
     AnnotationWriter->printInfoComment(V, Out);
 }
 
+
 // This member is called for each Instruction in a function..
 void AssemblyWriter::printInstruction(const Instruction &I) {
+  if (I.id) {
+    char buffer[10];
+    sprintf(buffer, "%04d", I.id);
+    Out << buffer;
+  }
+
   if (AnnotationWriter) AnnotationWriter->emitInstructionAnnot(&I, Out);
 
   // Print out indentation for an instruction.
@@ -2725,6 +2756,18 @@ void AssemblyWriter::printInstruction(const Instruction &I) {
 
   // Print out the opcode...
   Out << I.getOpcodeName();
+
+  // FIXME: consider this as HSAIL backend bug for now
+  if (const CallInst *CI = dyn_cast<CallInst>(&I)) {
+    if (CI->isMustTailCall()) {
+    }
+    else if (CI->isTailCall()) {
+    }
+
+    if (isHSATriple) {
+      Out << " spir_func";
+    }
+  }
 
   // If this is an atomic load or store, print out the atomic marker.
   if ((isa<LoadInst>(I)  && cast<LoadInst>(I).isAtomic()) ||
@@ -3106,6 +3149,13 @@ void AssemblyWriter::printMetadataAttachments(
 }
 
 void AssemblyWriter::writeMDNode(unsigned Slot, const MDNode *Node) {
+  char buffer[10];
+
+  if (Node->id) {
+    sprintf(buffer, "%03d", Node->id);
+    Out << buffer << "\t";
+  }
+
   Out << '!' << Slot << " = ";
   printMDNodeBody(Node);
   Out << "\n";

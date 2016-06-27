@@ -20,8 +20,44 @@
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Type.h"
+
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
+
+#include <iostream>
+#include <iomanip>
+
 #include <algorithm>
+#include <stdlib.h>
+
 using namespace llvm;
+
+static int counter = 0;
+static int CountLabel = (getenv("COUNTLABEL") ? atoi(getenv("COUNTLABEL")) : -1);
+static int Continue = (getenv("BREAK") ? 1:0);
+
+static void displayLabelGenerated(BasicBlock * B)
+{
+  char buffer[10];
+
+  llvm::dbgs() << "; Label ";
+
+  //none of these are defined
+  //llvm::dbgs() << std::setw(5); //what is the return type of setw?
+  //llvm::dbgs().width(5);
+
+  sprintf(buffer, "%03d", counter);
+  llvm::dbgs() << buffer;
+
+  llvm::dbgs() << " generated: ";
+
+  llvm::dbgs() << B->getName();
+
+  llvm::dbgs() << "\n";
+
+  if (Continue)
+    assert(!Continue && "Break");
+}
 
 ValueSymbolTable *BasicBlock::getValueSymbolTable() {
   if (Function *F = getParent())
@@ -40,7 +76,7 @@ template class llvm::SymbolTableListTraits<Instruction, BasicBlock>;
 
 BasicBlock::BasicBlock(LLVMContext &C, const Twine &Name, Function *NewParent,
                        BasicBlock *InsertBefore)
-  : Value(Type::getLabelTy(C), Value::BasicBlockVal), Parent(nullptr) {
+  : Value(Type::getLabelTy(C), Value::BasicBlockVal), id(0), Parent(nullptr) {
 
   if (NewParent)
     insertInto(NewParent, InsertBefore);
@@ -49,6 +85,29 @@ BasicBlock::BasicBlock(LLVMContext &C, const Twine &Name, Function *NewParent,
            "Cannot insert block before another block with no function!");
 
   setName(Name);
+
+  if (CountLabel >= 0) {
+    this->id = ++ counter;
+    if (counter == CountLabel){
+      /*
+      char buffer[10];
+
+      Name.dump();
+
+      llvm::dbgs() << ":\t;Label ";
+
+      //none of these are defined
+      //llvm::dbgs() << std::setw(5); //what is the return type of setw?
+      //llvm::dbgs().width(5);
+
+      sprintf(buffer, "%03d", counter);
+      llvm::dbgs() << buffer;
+
+      llvm::dbgs() << " generated." << "\n";
+      */
+      displayLabelGenerated(this);
+    }
+  }
 }
 
 void BasicBlock::insertInto(Function *NewParent, BasicBlock *InsertBefore) {

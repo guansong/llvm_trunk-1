@@ -91,6 +91,25 @@ raw_ostream &dbgs();
 //
 #define DEBUG(X) DEBUG_WITH_TYPE(DEBUG_TYPE, X)
 
+class delimiter {
+  public:
+  // make these functions inline,
+  // so it is possible to remove them completely in the ship build
+  //inline delimiter(int enabled, char * msg, char * open="[|", char * close="|]") {
+  delimiter(char const * msg, int enabled = 1);
+
+  ~delimiter();
+
+private:
+  int fEnabled;
+
+  //char * fOpen;
+  //char * fClose;
+};
+
 } // End llvm namespace
+
+#define MARK(x) llvm::delimiter(x, 0); llvm::dbgs() << " " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "\n";
+#define DELIMITER(x) llvm::dbgs() << x << " " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << " "; llvm::delimiter dummy("");
 
 #endif
