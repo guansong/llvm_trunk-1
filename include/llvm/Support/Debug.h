@@ -109,7 +109,10 @@ private:
 
 } // End llvm namespace
 
-#define MARK(x) llvm::delimiter(x, 0); llvm::dbgs() << " " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "\n";
-#define DELIMITER(x) llvm::dbgs() << x << " " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << " "; llvm::delimiter dummy("");
+#include <stdlib.h>
+static char * DebugDisplay = getenv("TRACE");
+
+#define MARK(x)      if (DebugDisplay) { llvm::delimiter(x, 0); llvm::dbgs() << " " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "\n"; }
+#define DELIMITER(x) if (DebugDisplay) { llvm::dbgs() << x << " " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << " "; llvm::delimiter dummy(""); }
 
 #endif
