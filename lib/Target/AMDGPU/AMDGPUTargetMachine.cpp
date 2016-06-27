@@ -295,3 +295,8 @@ void GCNPassConfig::addPreEmitPass() {
 TargetPassConfig *GCNTargetMachine::createPassConfig(PassManagerBase &PM) {
   return new GCNPassConfig(this, PM);
 }
+
+void AMDGPUTargetMachine::addPreLinkPasses(PassManagerBase &PM) {
+  // Add pre-linking passes.
+  //PM.addPass(createAMDGPUOpenCLImageTypeLoweringPass());
+}
