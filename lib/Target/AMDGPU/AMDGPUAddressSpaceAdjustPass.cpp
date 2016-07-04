@@ -1991,7 +1991,7 @@ PromoteGlobals::~PromoteGlobals()
 
 void PromoteGlobals::getAnalysisUsage(AnalysisUsage& AU) const
 {
-        AU.addRequired<CallGraphWrapperPass>();
+        //AU.addRequired<CallGraphWrapperPass>();
 }
 static std::string escapeName(const std::string &orig_name)
 {
@@ -2090,7 +2090,9 @@ Y("promote-globals", "Promote Pointer To Global Pass");
 INITIALIZE_PASS(PromoteGlobals, "promote-globals", "Promote Pointer to Global", false, false);
 #endif // BoltTranslator_EXPORTS
 
-llvm::ModulePass * createPromoteGlobalsPass ()
+llvm::ModulePass* llvm::createPromoteGlobalsPass ()
 {
         return new PromoteGlobals;
 }
+
+
