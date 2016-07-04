@@ -5,5 +5,6 @@ add_subdirectory(Scalar)
 add_subdirectory(IPO)
 add_subdirectory(Vectorize)
 add_subdirectory(Hello)
-add_subdirectory(SPIRify)
 add_subdirectory(ObjCARC)
+#build address adjustment as a separate pass
+#add_subdirectory(SPIRify)

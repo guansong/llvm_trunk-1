@@ -33,6 +33,7 @@
 #include "llvm/Support/raw_os_ostream.h"
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Promote.h"
 #include <llvm/CodeGen/Passes.h>
 
 using namespace llvm;
@@ -298,5 +299,7 @@ TargetPassConfig *GCNTargetMachine::createPassConfig(PassManagerBase &PM) {
 
 void AMDGPUTargetMachine::addPreLinkPasses(PassManagerBase &PM) {
   // Add pre-linking passes.
-  //PM.addPass(createAMDGPUOpenCLImageTypeLoweringPass());
+  //PM.add(createAMDGPUOpenCLImageTypeLoweringPass());
+  PM.add(llvm::createPromoteGlobalsPass());
 }
+

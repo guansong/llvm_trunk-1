@@ -4,3 +4,4 @@ namespace llvm {
   void initializePromoteGlobalsPass(llvm::PassRegistry&);
   ModulePass * createPromoteGlobalsPass ();
 }
+
